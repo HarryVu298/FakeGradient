@@ -28,17 +28,18 @@ import csv
 from ModelModify import ModifyModel,ModifyModelVGG, ModifyModelScale,ModifyModelVGGScale,ModifyModelMobNetV2Scale,ModifyModelDensNetScale
 from DeepFoolC import deepfoolC
 from DeepFoolB import deepfoolB
-import HeatMapForgradientOrPerturbation as HM
+# import HeatMapForgradientOrPerturbation as HM
 #from HeatMapForgradientOrPerturbation import heatmap
 import cv2
-from scipy.misc import imread, imsave, imresize
+# from scipy.misc import imread, imsave, imresize
+import imageio
 
 
 import numpy as np
 from torch.autograd import Variable
 import torch as torch
 import copy
-from torch.autograd.gradcheck import zero_gradients
+# from torch.autograd.gradcheck import zero_gradients
 
 import time
 
@@ -102,12 +103,12 @@ for i in range(1,10000):
     FNAME=Folder+FileName+IndexFull+Append
     #im_orig = Image.open('test_im2.jpg')
 
-    CC = cv2.imread(FNAME)
+    CC = cv2.imageio.imread(FNAME)
     #print(im_orig.size)
     a, b, c = CC.shape
     #print(CC.shape, c)
 
-    image = imread(FNAME)
+    image = imageio.imread(FNAME)
     if (len(image.shape) < 3):
         #print('gray')
         continue

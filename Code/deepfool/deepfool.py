@@ -1,13 +1,3 @@
-'''
-Normal Deepfool 1/15/2021
-Add return:
-gradient
-perturbation
-
-work with the defence method. Num_classes should be doubled
-'''
-
-
 import numpy as np
 from torch.autograd import Variable
 import torch as torch
@@ -24,8 +14,7 @@ def zero_gradients(x):
         for elem in x:
             zero_gradients(elem)
 
-
-def deepfoolC(image, net, num_classes=10, overshoot=0.02, max_iter=50):
+def deepfool(image, net, num_classes=10, overshoot=0.02, max_iter=50):
 
     """
        :param image: Image of size HxWx3
@@ -50,9 +39,6 @@ def deepfoolC(image, net, num_classes=10, overshoot=0.02, max_iter=50):
 
     I = I[0:num_classes]
     label = I[0]
-    B= (np.array(f_image)[0:1000]).flatten().argsort()[::-1]
-    Originallabel = B[0]
-
 
     input_shape = image.cpu().numpy().shape
     pert_image = copy.deepcopy(image)
@@ -65,16 +51,12 @@ def deepfoolC(image, net, num_classes=10, overshoot=0.02, max_iter=50):
     fs = net.forward(x)
     fs_list = [fs[0,I[k]] for k in range(num_classes)]
     k_i = label
-    CountFlag=0
+
     while k_i == label and loop_i < max_iter:
 
         pert = np.inf
-
         fs[0, I[0]].backward(retain_graph=True)
         grad_orig = x.grad.data.cpu().numpy().copy()
-        if CountFlag==0:
-            TheGradient=x.grad.data.cpu().numpy().copy()
-            CountFlag=1
 
         for k in range(1, num_classes):
             zero_gradients(x)
@@ -99,19 +81,16 @@ def deepfoolC(image, net, num_classes=10, overshoot=0.02, max_iter=50):
         r_tot = np.float32(r_tot + r_i)
 
         if is_cuda:
-
             pert_image = image + (1+overshoot)*torch.from_numpy(r_tot).cuda()
-
         else:
             pert_image = image + (1+overshoot)*torch.from_numpy(r_tot)
 
         x = Variable(pert_image, requires_grad=True)
         fs = net.forward(x)
         k_i = np.argmax(fs.data.cpu().numpy().flatten())
-        Protected = np.argmax(fs.data.cpu().numpy().flatten()[0:1000])
 
         loop_i += 1
 
     r_tot = (1+overshoot)*r_tot
 
-    return r_tot, loop_i, label, k_i, Originallabel,Protected,pert_image,TheGradient
+    return r_tot, loop_i, label, k_i, pert_image
