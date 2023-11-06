@@ -27,7 +27,7 @@ import csv
 from ModelModify import ModifyModel,ModifyModelVGG, ModifyModelScale
 from DeepFoolC import deepfoolC
 from DeepFoolB import deepfoolB
-import HeatMapForgradientOrPerturbation as HM
+from visualization import HeatMapForgradientOrPerturbation as HM
 #from HeatMapForgradientOrPerturbation import heatmap
 import cv2
 from scipy.misc import imread, imsave, imresize

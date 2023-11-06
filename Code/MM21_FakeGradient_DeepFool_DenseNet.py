@@ -27,8 +27,7 @@ import csv
 from ModelModify import ModifyModel,ModifyModelVGG, ModifyModelScale,ModifyModelVGGScale,ModifyModelMobNetV2Scale,ModifyModelDensNetScale
 from DeepFoolC import deepfoolC
 from DeepFoolB import deepfoolB
-import HeatMapForgradientOrPerturbation as HM
-#from HeatMapForgradientOrPerturbation import heatmap
+
 import cv2
 from scipy.misc import imread, imsave, imresize
 
@@ -73,6 +72,36 @@ Folder='D:/workspace/imagenet2012B/test/'
 FileName='ILSVRC2012_test'
 Append='.JPEG'            #00099990
 Error=[]
+
+def L2NormValue(tensor):
+    return torch.norm(tensor, p=2).item()
+
+# Define the L infinity norm computation
+def L_Inf(tensor):
+    return torch.norm(tensor, p=float('inf')).item()
+
+# Define a method to convert a 3D tensor to 2D (assuming the first dimension is channel)
+def get2Dfrom3D(height, width, tensor):
+    return tensor[0].cpu().numpy(), tensor[1].cpu().numpy(), tensor[2].cpu().numpy()
+
+# Define a method to show heatmap using matplotlib
+def heatmap(data, title, cmap='YlGn', cbarlabel=''):
+    plt.imshow(data, cmap=cmap)
+    plt.colorbar(label=cbarlabel)
+    plt.title(title)
+    plt.show()
+
+# Define a function to visualize perturbation or gradient comparison
+def CVShowCompare(tensor1, tensor2, title):
+    fig, axes = plt.subplots(1, 2)
+    axes[0].imshow(tensor1)
+    axes[0].set_title('Tensor 1')
+    axes[1].imshow(tensor2)
+    axes[1].set_title('Tensor 2')
+    plt.suptitle(title)
+    plt.show()
+
+
 for i in range(1,100000):
     Index=str(i+1)
     K=len(Index)
@@ -146,28 +175,28 @@ for i in range(1,100000):
     #L2 and Linfinity
 
     # get the perturbation and the gradient based on the defence one
-    RA, RB, RC = HM.get2Dfrom3D(224, 224, r)  # perturbation
+    RA, RB, RC = get2Dfrom3D(224, 224, r)  # perturbation
     # get the perturbation and the gradient based on the original version
-    BRA, BRB, BRC = HM.get2Dfrom3D(224, 224, rB)  # perturbation
+    BRA, BRB, BRC = get2Dfrom3D(224, 224, rB)  # perturbation
 
     #defence
-    L2RD=HM.L2NormValue(RA)
-    L2GD = HM.L2NormValue(RB)
-    L2BD = HM.L2NormValue(RC)
+    L2RD=L2NormValue(RA)
+    L2GD = L2NormValue(RB)
+    L2BD = L2NormValue(RC)
 
-    LIRD = HM.L_Inf(RA)
-    LIGD = HM.L_Inf(RB)
-    LIBD = HM.L_Inf(RC)
+    LIRD = L_Inf(RA)
+    LIGD = L_Inf(RB)
+    LIBD = L_Inf(RC)
 
     #original
 
-    L2RA = HM.L2NormValue(BRA)
-    L2GA = HM.L2NormValue(BRB)
-    L2BA = HM.L2NormValue(BRC)
+    L2RA = L2NormValue(BRA)
+    L2GA = L2NormValue(BRB)
+    L2BA = L2NormValue(BRC)
 
-    LIRA = HM.L_Inf(BRA)
-    LIGA = HM.L_Inf(BRB)
-    LIBA = HM.L_Inf(BRC)
+    LIRA = L_Inf(BRA)
+    LIGA = L_Inf(BRB)
+    LIBA = L_Inf(BRC)
     '''
     ValueTime = ['Original ATT,GT', 'Original ATT, ATT', 'On Fake ATT, GT', 'On Fake ATT,ATT', 'On Fake ATT, Def',
                  'ACC', 'ACC_ALL', 'DL2R', 'DL2G', 'DL2B', 'DLIR', 'DLIG', 'DLIB', 'AL2R', 'AL2G', 'AL2B', 'ALIR',
@@ -215,57 +244,57 @@ plt.show()
 
 
 # get the perturbation and the gradient based on the defence one
-GA,GB,GC=HM.get2Dfrom3D(224,224,TheGradient)   #gradient
-RA,RB,RC=HM.get2Dfrom3D(224,224,r)      # perturbation
+GA,GB,GC=get2Dfrom3D(224,224,TheGradient)   #gradient
+RA,RB,RC=get2Dfrom3D(224,224,r)      # perturbation
 # get the perturbation and the gradient based on the original version
-BGA,BGB,BGC=HM.get2Dfrom3D(224,224,TheGradientB)   #gradient
-BRA,BRB,BRC=HM.get2Dfrom3D(224,224,rB)      # perturbation
+BGA,BGB,BGC=get2Dfrom3D(224,224,TheGradientB)   #gradient
+BRA,BRB,BRC=get2Dfrom3D(224,224,rB)      # perturbation
 
 #
 title="Perturbation Compare A, Positive 4"
-HM.CVShowCompareFB(RA,BRA,title)
+CVShowCompareFB(RA,BRA,title)
 title="Perturbation Compare A, Negtive 4"
-HM.CVShowCompareGB(RA,BRA,title)
+CVShowCompareGB(RA,BRA,title)
 print("L2")
-print(HM.L2NormValue(RA))
-print(HM.L2NormValue(BRA))
+print(L2NormValue(RA))
+print(L2NormValue(BRA))
 title="Perturbation Compare A, Positive 0"
-HM.CVShowCompareF(RA,BRA,title)
+CVShowCompareF(RA,BRA,title)
 title="Perturbation Compare A, Negtive 0"
-HM.CVShowCompareG(RA,BRA,title)
+CVShowCompareG(RA,BRA,title)
 
 title="Perturbation Compare A, Positive 2"
-HM.CVShowCompareFC(RA,BRA,title)
+CVShowCompareFC(RA,BRA,title)
 title="Perturbation Compare A, Negtive 2"
-HM.CVShowCompareGC(RA,BRA,title)
+CVShowCompareGC(RA,BRA,title)
 
 
 title="Perturbation Compare B, Positive"
-HM.CVShowCompareF(RB,BRB,title)
+CVShowCompareF(RB,BRB,title)
 title="Perturbation Compare B, Negtive"
-HM.CVShowCompareG(RB,BRB,title)
+CVShowCompareG(RB,BRB,title)
 
 title="Perturbation Compare C, Positive"
-HM.CVShowCompareF(RC,BRC,title)
+CVShowCompareF(RC,BRC,title)
 title="Perturbation Compare C, Negtive"
-HM.CVShowCompareG(RC,BRC,title)
+CVShowCompareG(RC,BRC,title)
 
 title="Gradient Compare A, Positive"
-HM.CVShowCompareF(GA,BGA,title)
+CVShowCompareF(GA,BGA,title)
 title="Gradient Compare A, Negtive"
-HM.CVShowCompareG(GA,BGA,title)
+CVShowCompareG(GA,BGA,title)
 
 
 title="Gradient Compare B, Positive"
-HM.CVShowCompareF(GB,BGB,title)
+CVShowCompareF(GB,BGB,title)
 title="Gradient Compare B, Negtive"
-HM.CVShowCompareG(GB,BGB,title)
+CVShowCompareG(GB,BGB,title)
 
 
 title="Gradient Compare C, Positive"
-HM.CVShowCompareF(GC,BGC,title)
+CVShowCompareF(GC,BGC,title)
 title="Gradient Compare C, Negtive"
-HM.CVShowCompareG(GC,BGC,title)
+CVShowCompareG(GC,BGC,title)
 
 
 
@@ -274,28 +303,28 @@ HM.CVShowCompareG(GC,BGC,title)
 #show the heatmap of the perturbation
 
 
-RA,RB,RC=HM.get2Dfrom3D(224,224,r)
+RA,RB,RC=get2Dfrom3D(224,224,r)
 Title="Perturbation Orginal A"
-im, cbar = HM.heatmap(RA,Title,cmap="YlGn", cbarlabel="Perturbation")
+im, cbar = heatmap(RA,Title,cmap="YlGn", cbarlabel="Perturbation")
 Title="Perturbation B"
-im, cbar = HM.heatmap(RB,Title,cmap="YlGn", cbarlabel="Perturbation")
+im, cbar = heatmap(RB,Title,cmap="YlGn", cbarlabel="Perturbation")
 Title="Perturbation C"
-im, cbar = HM.heatmap(RC,Title,cmap="YlGn", cbarlabel="Perturbation")
+im, cbar = heatmap(RC,Title,cmap="YlGn", cbarlabel="Perturbation")
 
 
-RA,RB,RC=HM.get2Dfrom3D(224,224,rB)
+RA,RB,RC=get2Dfrom3D(224,224,rB)
 Title="Perturbation by Faked GradientA"
-im, cbar = HM.heatmap(RA,Title,cmap="YlGn", cbarlabel="Perturbation")
+im, cbar = heatmap(RA,Title,cmap="YlGn", cbarlabel="Perturbation")
 Title="Perturbation B"
-im, cbar = HM.heatmap(RB,Title,cmap="YlGn", cbarlabel="Perturbation")
+im, cbar = heatmap(RB,Title,cmap="YlGn", cbarlabel="Perturbation")
 Title="Perturbation C"
-im, cbar = HM.heatmap(RC,Title,cmap="YlGn", cbarlabel="Perturbation")
+im, cbar = heatmap(RC,Title,cmap="YlGn", cbarlabel="Perturbation")
 
 GA,GB,GC=HM.get2Dfrom3D(224,224,TheGradient)
 
 Title="Gradient A"
-im, cbar = HM.heatmap(GA,Title,cmap="YlGn", cbarlabel="Gradient")
+im, cbar = heatmap(GA,Title,cmap="YlGn", cbarlabel="Gradient")
 Title="Gradient B"
-im, cbar = HM.heatmap(GB,Title,cmap="YlGn", cbarlabel="Perturbation")
+im, cbar = heatmap(GB,Title,cmap="YlGn", cbarlabel="Perturbation")
 Title="Gradient C"
-im, cbar = HM.heatmap(GC,Title,cmap="YlGn", cbarlabel="Gradient")
+im, cbar = heatmap(GC,Title,cmap="YlGn", cbarlabel="Gradient")
