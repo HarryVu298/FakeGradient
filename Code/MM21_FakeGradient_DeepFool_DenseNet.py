@@ -69,7 +69,7 @@ CountDF_EFF=0   #deepfool
 CountDF_EFF_Def=0  #DeepFool
 
 
-Folder='D:/workspace/imagenet2012B/test/'
+Folder='/users/PMIU0211/minhkhoa29082003/Downloads/imagenet2012B/test/'
 FileName='ILSVRC2012_test'
 Append='.JPEG'            #00099990
 Error=[]
