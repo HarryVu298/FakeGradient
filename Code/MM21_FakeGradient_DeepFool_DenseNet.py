@@ -29,7 +29,8 @@ from DeepFoolC import deepfoolC
 from DeepFoolB import deepfoolB
 
 import cv2
-from scipy.misc import imread, imsave, imresize
+# from scipy.misc import imread, imsave, imresize
+import imageio
 
 Scale=20
 
@@ -117,7 +118,7 @@ for i in range(1,100000):
     a, b, c = CC.shape
     #print(CC.shape, c)
 
-    image = imread(FNAME)
+    image = imageio.imread(FNAME)
     if (len(image.shape) < 3):
         #print('gray')
         continue
