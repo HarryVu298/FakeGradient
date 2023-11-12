@@ -30,7 +30,8 @@ from DeepFoolB import deepfoolB
 
 import cv2
 # from scipy.misc import imread, imsave, imresize
-import imageio
+import imageio.v2 as imageio
+from torchvision import transforms
 
 Scale=20
 
@@ -140,13 +141,13 @@ for i in range(1,100000):
 
     # Remove the mean
     im = transforms.Compose([
-        transforms.Scale(256),
+        transforms.Resize(256),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize(mean = mean,
                              std = std)])(im_orig)
     imB = transforms.Compose([
-        transforms.Scale(256),
+        transforms.Resize(256),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize(mean = mean,
