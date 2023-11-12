@@ -75,8 +75,9 @@ FileName='ILSVRC2012_test'
 Append='.JPEG'            #00099990
 Error=[]
 
-def L2NormValue(tensor):
-    return torch.norm(tensor, p=2).item()
+def L2NormValue(array):
+    return np.linalg.norm(array)
+
 
 # Define the L infinity norm computation
 def L_Inf(tensor):
