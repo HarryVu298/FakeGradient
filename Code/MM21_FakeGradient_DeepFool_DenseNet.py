@@ -83,9 +83,16 @@ def L_Inf(tensor):
     return torch.norm(tensor, p=float('inf')).item()
 
 # Define a method to convert a 3D tensor to 2D (assuming the first dimension is channel)
-def get2Dfrom3D(height, width, array):
-    # Assuming 'array' is a 3D NumPy array with shape [channels, height, width]
-    return array[0], array[1], array[2]
+def get2Dfrom3D(height, width, input_data):
+    if isinstance(input_data, torch.Tensor):
+        # Handle PyTorch tensor
+        return input_data[0].cpu().numpy(), input_data[1].cpu().numpy(), input_data[2].cpu().numpy()
+    elif isinstance(input_data, np.ndarray):
+        # Handle NumPy array
+        return input_data[0], input_data[1], input_data[2]
+    else:
+        raise TypeError("Input must be a PyTorch tensor or a NumPy array")
+
 
 
 # Define a method to show heatmap using matplotlib
