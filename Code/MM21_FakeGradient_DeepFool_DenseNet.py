@@ -81,7 +81,9 @@ def L2NormValue(array):
 
 # Define the L infinity norm computation
 def L_Inf(array):
-    return np.linalg.norm(array, ord=np.inf)
+    flat_array = array.flatten()
+    return np.linalg.norm(flat_array, ord=np.inf)
+
 
 
 
