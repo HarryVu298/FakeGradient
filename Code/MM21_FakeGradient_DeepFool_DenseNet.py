@@ -213,7 +213,12 @@ for i in range(1,100000):
 
 
 print("Final Result:   ",CountT,CountTotal,CountDF_EFF,CountDF_EFF_Def)
-ValueTime=[CountT,CountTotal,CountDF_EFF,CountDF_EFF_Def,int(CountT*100/CountTotal)]
+if CountTotal > 0:
+    percentage = int(CountT * 100 / CountTotal)
+else:
+    percentage = None  # or handle it in a way that makes sense for your context
+ValueTime = [CountT, CountTotal, CountDF_EFF, CountDF_EFF_Def, percentage]
+# ValueTime=[CountT,CountTotal,CountDF_EFF,CountDF_EFF_Def,int(CountT*100/CountTotal)]
 writerT.writerow(ValueTime)
 exit()
 
