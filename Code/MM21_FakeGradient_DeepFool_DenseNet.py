@@ -80,8 +80,10 @@ def L2NormValue(array):
 
 
 # Define the L infinity norm computation
-def L_Inf(tensor):
-    return torch.norm(tensor, p=float('inf')).item()
+def L_Inf(array):
+    return np.linalg.norm(array, ord=np.inf)
+
+
 
 # Define a method to convert a 3D tensor to 2D (assuming the first dimension is channel)
 def get2Dfrom3D(height, width, array):
