@@ -115,6 +115,9 @@ for i in range(1,100000):
 
     CC = cv2.imread(FNAME)
     #print(im_orig.size)
+    if CC is None:
+        print(f"Failed to load image {FNAME}")
+        continue  # Skip the rest of the loop for this iteration
     a, b, c = CC.shape
     #print(CC.shape, c)
 
