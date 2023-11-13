@@ -193,6 +193,8 @@ for i in range(1,100000):
         CountT=CountT+1
         AccB=1
     print("Efficiency: ===>", int(CountT*100/CountTotal))
+    print("Success:", CountT)
+    print("Total trials:", CountTotal)
     #L2 and Linfinity
 
     # get the perturbation and the gradient based on the defence one
