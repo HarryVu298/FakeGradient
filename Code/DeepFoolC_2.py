@@ -12,7 +12,7 @@ def deepfoolC(image, net, num_classes=10, overshoot=0.02, max_iter=50):
     else:
         print("Using CPU")
 
-    f_image = net(Variable(image[None, :, :, :], requires_grad=True)).data.flatten()
+    f_image = net.forward(Variable(image[None, :, :, :], requires_grad=True)).data.flatten()
     I = f_image.argsort(descending=True)[:num_classes]
 
     label = I[0]
