@@ -37,58 +37,23 @@ Scale=20
 
 
 
-
-
+net = models.densenet121(pretrained=True).cuda()
 #net.classifier=nn.Linear(in_features=1024, out_features=2000, bias=True)
 #print(net.classifier)
 #exit()
 #net2 = models.resnet18(pretrained=True)
 # Switch to evaluation mode
-
+net.eval()
 '''
 net2 = models.resnet34(pretrained=True)
 #net2 = models.resnet18(pretrained=True)
 # Switch to evaluation mode
 net2.eval()
 '''
-net = models.densenet121(pretrained=True)
 net2 = models.densenet121(pretrained=True)
-
-if torch.cuda.device_count() > 1:
-    print("Using", torch.cuda.device_count(), "GPUs.")
-    net = nn.DataParallel(net)
-    net2 = nn.DataParallel(net2)
-
-net = net.cuda()
-net2 = net2.cuda()
-
-# Continue with your modifications on net2
-net2 = ModifyModelDensNetScale(net2, Scale)
-
-
-net.eval()
-
+net2= ModifyModelDensNetScale(net2,Scale)
+net2.cuda()
 net2.eval()
-
-#
-AT="DeepFool"
-CSVfilenameTime ='Densenet121'+'_'+ AT +"_"+str(Scale)+"_MethodB"+'_Result.csv'
-fileobjT = open(CSVfilenameTime, 'w', newline='')  # wb
-# fileobj.write('\xEF\xBB\xBF')#
-# 
-writerT = csv.writer(fileobjT)  # csv.writer(fileobj)writerwriter
-ValueTime=['Original ATT,GT','Original ATT, ATT','On Fake ATT, GT','On Fake ATT,ATT','On Fake ATT, Def','ACC','ACC_ALL','DL2R','DL2G','DL2B','DLIR','DLIG','DLIB','AL2R','AL2G','AL2B','ALIR','ALIG','ALIB']
-writerT.writerow(ValueTime)
-CountT=0        #
-CountTotal=0    #
-CountDF_EFF=0   #deepfool 
-CountDF_EFF_Def=0  #DeepFool
-
-
-Folder='/users/PMIU0211/minhkhoa29082003/Downloads/test/'
-FileName='ILSVRC2012_test'
-Append='.JPEG'            #00099990
-Error=[]
 
 def L2NormValue(array):
     return np.linalg.norm(array)
@@ -135,62 +100,48 @@ def CVShowCompare(tensor1, tensor2, title):
     plt.show()
 
 
-for i in range(1,100000):
-    Index=str(i+1)
-    K=len(Index)
-    IndexFull='_'
-    for j in range(8-K):
-        IndexFull=IndexFull+str(0)
-    IndexFull=IndexFull+Index
-    FNAME=Folder+FileName+IndexFull+Append
-    #im_orig = Image.open('test_im2.jpg')
+# Other initializations
+Folder = '/users/PMIU0211/minhkhoa29082003/Downloads/test/'
+FileName = 'ILSVRC2012_test'
+Append = '.JPEG'
+CSVfilenameTime = 'Densenet121' + '_' + "DeepFool" + "_" + str(Scale) + "_MethodB" + '_Result.csv'
+fileobjT = open(CSVfilenameTime, 'w', newline='')
+writerT = csv.writer(fileobjT)
+ValueTime = ['Original ATT,GT', 'Original ATT, ATT', 'On Fake ATT, GT', 'On Fake ATT,ATT', 'On Fake ATT, Def', 'ACC',
+             'ACC_ALL', 'DL2R', 'DL2G', 'DL2B', 'DLIR', 'DLIG', 'DLIB', 'AL2R', 'AL2G', 'AL2B', 'ALIR', 'ALIG', 'ALIB']
+writerT.writerow(ValueTime)
+CountT = 0
+CountTotal = 0
+CountDF_EFF = 0
+CountDF_EFF_Def = 0
+
+# Predefined transformations (moved outside the loop)
+preprocess = transforms.Compose([
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+])
+
+# Loop to process images
+for i in range(1, 100000):
+    Index = str(i + 1).zfill(8)  # Simpler way to create a zero-padded string
+    FNAME = Folder + FileName + "_" + Index + Append
 
     CC = cv2.imread(FNAME)
-    #print(im_orig.size)
-    if CC is None:
-        print(f"Failed to load image {FNAME}")
-        continue  # Skip the rest of the loop for this iteration
-    a, b, c = CC.shape
-    #print(CC.shape, c)
-
-    image = imageio.imread(FNAME)
-    if (len(image.shape) < 3):
-        #print('gray')
-        continue
-    if c!=3:
+    if CC is None or CC.shape[2] != 3:
         continue
 
-    CountTotal=CountTotal+1
+    CountTotal += 1
 
-    #im_orig = Image.open('test_im2.jpg')
-    #im_orig = Image.open('ILSVRC2012_test_00000002.JPEG')
-    mean = [ 0.485, 0.456, 0.406 ]
-    std = [ 0.229, 0.224, 0.225 ]
-    #im_origB = Image.open('ILSVRC2012_test_00000002.JPEG')
     im_orig = Image.open(FNAME)
-    im_origB = Image.open(FNAME)
 
-    # Remove the mean
-    im = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize(mean = mean,
-                             std = std)])(im_orig)
-    imB = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize(mean = mean,
-                             std = std)])(im_origB)
-    #r, loop_i, label_orig, label_pert, pert_image = deepfool(im, net)
-    '''
-    f_image = net.forward(Variable(im[None, :, :, :], requires_grad=True)).data.cpu().numpy().flatten()
-    I = (np.array(f_image)).flatten().argsort()[::-1]
-    Originallabel = I[0]
-    '''
-    r, loop_i, label_orig, label_pert, Originallabel,Protected,pert_image,TheGradient = deepfoolC(im, net2)
-    rB, loop_iB, label_origB, label_pertB, pert_imageB,TheGradientB = deepfoolB(imB, net)
+    # Process the image and move it to GPU
+    im = preprocess(im_orig).unsqueeze(0).cuda()
+    imB = preprocess(im_orig).unsqueeze(0).cuda()
+
+    r, loop_i, label_orig, label_pert, Originallabel, Protected, pert_image, TheGradient = deepfoolC(im, net2)
+    rB, loop_iB, label_origB, label_pertB, pert_imageB, TheGradientB = deepfoolB(imB, net)
     print("original:    ", Originallabel)
     print("original:    ", Protected)
     #summary result
