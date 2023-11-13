@@ -25,8 +25,8 @@ from deepfool import deepfool
 import os
 import csv
 from ModelModify import ModifyModel,ModifyModelVGG, ModifyModelScale,ModifyModelVGGScale,ModifyModelMobNetV2Scale,ModifyModelDensNetScale
-from DeepFoolC import deepfoolC
-from DeepFoolB import deepfoolB
+from DeepFoolC_2 import deepfoolC
+from DeepFoolB_2 import deepfoolB
 
 import cv2
 # from scipy.misc import imread, imsave, imresize
