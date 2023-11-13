@@ -285,8 +285,7 @@ def ModifyModelMobNetV2(net2):
 
 def ModifyModelDensNet(net2):
     # print(net2)
-    TTB = net2.module.classifier.weight
-    # TTB = net2.classifier.weight
+    TTB = net2.classifier.weight
     BiaB = net2.classifier.bias
 
     # TTB=net1.classifier[6].weight
